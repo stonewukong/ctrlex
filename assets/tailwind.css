@@ -1,0 +1,38 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
+    font-weight: 400;
+    color-scheme: light dark;
+    color: rgba(255, 255, 255, 0.87);
+    font-synthesis: none;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    -webkit-text-size-adjust: 100%;
+
+    /* Dark Variables */
+    --color-background: 0deg, 0%, 15%;
+    --color-content: 0deg 0% 98%;
+    --color-selected-btn: 0deg 0% 16%;
+    --color-btn-border: 0deg 0% 20%;
+    --color-btn-bg: 0deg, 0%, 11%;
+  }
+}
+
+@font-face {
+  font-family: 'Fira Code', monospace;
+  src: url('/assets/fonts/FiraCode-Bold.woff') format('woff');
+  font-weight: 700;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Fira Code', monospace;
+  src: url('/assets/fonts/FiraCode-SemiBold.woff') format('woff');
+  font-weight: 600;
+  font-style: normal;
+}
