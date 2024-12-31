@@ -1,4 +1,4 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
@@ -6,8 +6,34 @@
     <title>Default Popup Title</title>
     <meta name="manifest.type" content="browser_action" />
   </head>
-  <body>
-    <div id="app"></div>
+  <body
+    class="min-h-[478px] min-w-[320px] bg-background p-6 m-0 place-items-center"
+  >
+    <div id="app" class="h-full w-full">
+      <div class="flex justify-between items-center">
+        <p
+          class="text-xl text-content font-fira font-semibold tracking-tight mt-[2px] select-none"
+        >
+          ctrlex
+        </p>
+        <p></p>
+        <div class="flex gap-3">
+          <img
+            src="/assets/icons/settings.svg"
+            class="select-none cursor-pointer"
+            alt="settings logo"
+          />
+          <img
+            src="/assets/icons/theme.svg"
+            class="select-none cursor-pointer"
+            alt="theme logo"
+          />
+        </div>
+      </div>
+      <div>
+        <p class=""></p>
+      </div>
+    </div>
     <script type="module" src="./main.ts"></script>
   </body>
 </html>
