@@ -10,7 +10,11 @@ export default {
       colors: {
         background: 'hsl(var(--color-background))',
         content: 'hsl(var(--color-content))',
-        // 'selected-btn': 'hsl(var(--color-selected-btn)',
+        tertiary: 'hsl(var(--color-tertiary))',
+        'selected-btn': 'hsl(var(--color-selected-btn))',
+        'sub-heading': 'hsl(var(--color-sub-heading))',
+        'btn-border': 'hsl(var(--color-btn-border))',
+        'btn-bg': 'hsl(var(--color-btn-bg))',
       },
     },
   },

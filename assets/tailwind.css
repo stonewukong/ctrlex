@@ -15,11 +15,13 @@
     -webkit-text-size-adjust: 100%;
 
     /* Dark Variables */
-    --color-background: 0deg, 0%, 15%;
+    --color-background: 0deg, 0%, 11%;
     --color-content: 0deg 0% 98%;
-    --color-selected-btn: 0deg 0% 16%;
+    --color-selected-btn: 0deg 0% 96%;
     --color-btn-border: 0deg 0% 20%;
-    --color-btn-bg: 0deg, 0%, 11%;
+    --color-btn-bg: 0deg, 0%, 16%;
+    --color-tertiary: 0deg, 0%, 71%;
+    --color-sub-heading: 0deg, 0%, 91%;
   }
 }
 
