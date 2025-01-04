@@ -44,8 +44,21 @@ function createExtensionItem(
 
   // Extension Icon
   const icon = document.createElement('img');
-  icon.src = ex.icons?.[0]?.url ?? '';
   icon.alt = '';
+  if (navigator.userAgent.toLowerCase().includes('firefox')) {
+    const exIconURLPromise = getExtensionIcon(ex.id);
+
+    exIconURLPromise.then((data) => {
+      if (data) {
+        const iconUrl = data.icon_url;
+        icon.src = iconUrl;
+      } else {
+        console.log('Failed to fetch icon for extension:', ex.id);
+      }
+    });
+  } else {
+    icon.src = ex.icons?.[0]?.url ?? '';
+  }
   icon.className = 'w-4 h-4';
   exElementDiv.appendChild(icon);
 
@@ -90,4 +103,21 @@ function createExtensionItem(
   exElement.appendChild(actionContainer);
 
   return exElement;
+}
+
+async function getExtensionIcon(id: string) {
+  try {
+    const res = await fetch(
+      `https://addons.mozilla.org/api/v4/addons/addon/${id}/`
+    );
+
+    if (!res.ok) {
+      throw new Error(`Failed to fetch extension icon: ${res.status}`);
+    }
+
+    return await res.json();
+  } catch (error) {
+    console.error('Error fetching extension icon:', error);
+    return null;
+  }
 }
