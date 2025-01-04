@@ -13,45 +13,81 @@ document.addEventListener('DOMContentLoaded', () => {
     extensions = data.message;
 
     if (extensionsCount) {
+      extensions = extensions.filter(
+        (ex) =>
+          ex.type !== 'theme' && ex.id !== 'addons-search-detection@mozilla.com'
+      );
       extensionsCount.innerText = extensions.length.toString();
     }
 
     if (extensionsList) {
       extensionsList.innerHTML = '';
-      extensions.forEach((ex) => {
-        const extensionItem = document.createElement('li');
-        extensionItem.className =
-          'p-3 gap-1.5 items-center hover:bg-selected-btn/10 cursor-pointer duration-300 transition-colors rounded-xl flex border border-btn-border/80 w-full justify-between';
-        const imageURL =
-          ex.icons?.[0]?.url || '/assets/icons/imagenotfound.svg';
-        const isEnabled = ex.enabled ?? false;
-        extensionItem.innerHTML = `
-              <div class="flex gap-2 items-center">
-                <!-- Icon -->
-                <img
-                  src=${imageURL}
-                  alt="extension logo"
-                  class="w-4 h-4"
-                />
-                <!-- Name -->
-                <p class="text-ellipsis max-w-44 truncate">
-                  ${ex.name}
-                </p>
-              </div>
-              <div class="flex gap-2 items-center">
-                <svg id="extension-details" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#b4b4b4" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-info hover:stroke-neutral-50"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
-                <label class="inline-flex items-center cursor-pointer">
-                <input type="checkbox" value="" class="sr-only peer" ${
-                  isEnabled ? 'checked' : ''
-                }/>
-                  <div
-                    class="relative w-9 h-5 bg-btn-bg peer-focus:outline-none rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"
-                  ></div>
-                </label>
-              </div>
-           `;
-        extensionsList.appendChild(extensionItem);
-      });
     }
+
+    extensions.forEach((ex) => {
+      const extensionItem = createExtensionItem(ex);
+      extensionsList?.appendChild(extensionItem);
+    });
   });
 });
+
+function createExtensionItem(
+  ex: chrome.management.ExtensionInfo
+): HTMLLIElement {
+  const exElement = document.createElement('li');
+  exElement.className =
+    'p-3 gap-1.5 items-center hover:bg-selected-btn/10 cursor-pointer duration-300 transition-colors rounded-xl flex border border-btn-border/80 w-full justify-between';
+
+  const isEnabled = ex.enabled ?? false;
+  const exElementDiv = document.createElement('div');
+  exElementDiv.className = 'flex gap-2 items-center';
+
+  // Extension Icon
+  const icon = document.createElement('img');
+  icon.src = ex.icons?.[0]?.url ?? '';
+  icon.alt = '';
+  icon.className = 'w-4 h-4';
+  exElementDiv.appendChild(icon);
+
+  // Extension Name
+  const exName = document.createElement('p');
+  exName.className = 'text-ellipsis max-w-44 truncate';
+  exName.textContent = ex.name;
+  exElementDiv.appendChild(exName);
+
+  // Actions container
+  const actionContainer = document.createElement('div');
+  actionContainer.className = 'flex gap-2 items-center';
+
+  const detailsSVG = `
+  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#b4b4b4" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-info hover:stroke-white duration-200 transition-colors">
+    <circle cx="12" cy="12" r="10"></circle>
+    <path d="M12 16v-4"></path>
+    <path d="M12 8h.01"></path>
+  </svg>
+`;
+  const detailsIcon = document.createElement('div');
+  detailsIcon.innerHTML = detailsSVG;
+  actionContainer.appendChild(detailsIcon);
+
+  const toggleLabel = document.createElement('label');
+  toggleLabel.className = 'inline-flex items-center cursor-pointer';
+
+  const toggleInput = document.createElement('input');
+  toggleInput.type = 'checkbox';
+  toggleInput.className = 'sr-only peer';
+  toggleInput.checked = isEnabled;
+
+  const toggleDiv = document.createElement('div');
+  toggleDiv.className =
+    'relative w-9 h-5 bg-btn-bg peer-focus:outline-none rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[""] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600';
+
+  toggleLabel.appendChild(toggleInput);
+  toggleLabel.appendChild(toggleDiv);
+  actionContainer.appendChild(toggleLabel);
+
+  exElement.appendChild(exElementDiv);
+  exElement.appendChild(actionContainer);
+
+  return exElement;
+}
