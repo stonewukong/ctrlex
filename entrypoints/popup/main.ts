@@ -1,35 +1,78 @@
 import '../../assets/tailwind.css';
 
-document.addEventListener('DOMContentLoaded', () => {
-  let extensions: chrome.management.ExtensionInfo[];
+document.addEventListener('DOMContentLoaded', async () => {
+  let extensions = await getExtensions();
   const extensionsCount =
     document.querySelector<HTMLParagraphElement>('#extensionsCount');
-  const port = browser.runtime.connect();
 
   const extensionsList =
     document.querySelector<HTMLParagraphElement>('#extensionsList');
 
-  port.onMessage.addListener((data) => {
-    extensions = data.message;
+  if (extensionsCount) {
+    extensionsCount.innerText = extensions.length.toString();
+  }
 
-    if (extensionsCount) {
-      extensions = extensions.filter(
-        (ex) =>
-          ex.type !== 'theme' && ex.id !== 'addons-search-detection@mozilla.com'
-      );
-      extensionsCount.innerText = extensions.length.toString();
-    }
+  if (extensionsList) {
+    extensionsList.innerHTML = '';
+  }
 
-    if (extensionsList) {
-      extensionsList.innerHTML = '';
-    }
+  extensions.forEach((ex) => {
+    const extensionItem = createExtensionItem(ex);
+    extensionsList?.appendChild(extensionItem);
+  });
 
-    extensions.forEach((ex) => {
-      const extensionItem = createExtensionItem(ex);
-      extensionsList?.appendChild(extensionItem);
-    });
+  const search = document.querySelector<HTMLInputElement>('#search-ex');
+  const exListItems = extensionsList?.querySelectorAll('li');
+  search?.addEventListener('input', () =>
+    searchExtensions(search, exListItems)
+  );
+
+  const filter = document.querySelector<HTMLSelectElement>('#filter');
+
+  filter?.addEventListener('change', () => {
+    filterExtensions(filter.value, exListItems);
   });
 });
+
+function filterExtensions(
+  filterValue: string,
+  exListItems: NodeListOf<HTMLLIElement> | undefined
+) {
+  exListItems?.forEach((ex) => {
+    const toggleElement = ex.querySelector<HTMLInputElement>('input');
+
+    if (!toggleElement) return;
+
+    const isChecked = toggleElement.checked;
+    switch (filterValue) {
+      case 'enabled':
+        ex.style.display = isChecked ? '' : 'none';
+        break;
+      case 'disabled':
+        ex.style.display = isChecked ? 'none' : '';
+        break;
+      default:
+        ex.style.display = '';
+        break;
+    }
+  });
+}
+
+function searchExtensions(
+  search: HTMLInputElement,
+  exListItems: NodeListOf<HTMLLIElement> | undefined
+) {
+  const query = search.value.toLowerCase();
+  exListItems?.forEach((ex) => {
+    const nameElement = ex.querySelector('p');
+    const name = nameElement?.textContent?.toLowerCase() || '';
+    if (name.includes(query)) {
+      ex.style.display = '';
+    } else {
+      ex.style.display = 'none';
+    }
+  });
+}
 
 function createExtensionItem(
   ex: chrome.management.ExtensionInfo
@@ -38,7 +81,7 @@ function createExtensionItem(
   exElement.className =
     'p-3 gap-1.5 items-center hover:bg-selected-btn/10 cursor-pointer duration-300 transition-colors rounded-xl flex border border-btn-border/80 w-full justify-between';
 
-  const isEnabled = ex.enabled ?? false;
+  let isEnabled = ex.enabled;
   const exElementDiv = document.createElement('div');
   exElementDiv.className = 'flex gap-2 items-center';
 
@@ -70,18 +113,7 @@ function createExtensionItem(
 
   // Actions container
   const actionContainer = document.createElement('div');
-  actionContainer.className = 'flex gap-2 items-center';
-
-  //   const detailsSVG = `
-  //   <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#b4b4b4" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-info hover:stroke-white duration-200 transition-colors">
-  //     <circle cx="12" cy="12" r="10"></circle>
-  //     <path d="M12 16v-4"></path>
-  //     <path d="M12 8h.01"></path>
-  //   </svg>
-  // `;
-  //   const detailsIcon = document.createElement('div');
-  //   detailsIcon.innerHTML = detailsSVG;
-  // actionContainer.appendChild(detailsIcon);
+  actionContainer.className = 'flex items-center';
 
   const toggleLabel = document.createElement('label');
   toggleLabel.className = 'inline-flex items-center cursor-pointer';
@@ -102,7 +134,33 @@ function createExtensionItem(
   exElement.appendChild(exElementDiv);
   exElement.appendChild(actionContainer);
 
+  toggleInput.addEventListener('change', () => {
+    isEnabled = !isEnabled;
+    if (navigator.userAgent.toLowerCase().includes('firefox')) {
+      browser.tabs.create({ url: 'about:addons' });
+    }
+    browser.management.setEnabled(ex.id, isEnabled);
+  });
+
   return exElement;
+}
+
+async function getExtensions(): Promise<chrome.management.ExtensionInfo[]> {
+  return new Promise((resolve) => {
+    const port = browser.runtime.connect();
+    port.onMessage.addListener((data) => {
+      if (!data || !data.message) {
+        console.error('Failed to retrieve extensions data:', data);
+        return resolve([]);
+      }
+      let extensions = data.message;
+      extensions = extensions.filter(
+        (ex: chrome.management.ExtensionInfo) =>
+          ex.type !== 'theme' && ex.id !== 'addons-search-detection@mozilla.com'
+      );
+      resolve(extensions);
+    });
+  });
 }
 
 async function getExtensionIcon(id: string) {
