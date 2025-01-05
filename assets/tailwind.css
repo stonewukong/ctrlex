@@ -38,3 +38,31 @@
   font-weight: 600;
   font-style: normal;
 }
+
+/* Apply the styles to all scrollable elements */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 4px !important;
+}
+
+/* Track (background of the scrollbar) */
+::-webkit-scrollbar-track {
+  background: transparent;
+  border-radius: 10px;
+}
+
+/* Thumb (the draggable part) */
+::-webkit-scrollbar-thumb {
+  background: #5b5b5b;
+  border-radius: 10px;
+}
+
+/* Hover effect for the thumb */
+::-webkit-scrollbar-thumb:hover {
+  background: #909090;
+}
+
+/* Corner (intersection of vertical and horizontal scrollbars) */
+::-webkit-scrollbar-corner {
+  background: transparent;
+}

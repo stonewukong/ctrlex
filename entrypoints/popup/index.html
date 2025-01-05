@@ -6,9 +6,7 @@
     <title>Default Popup Title</title>
     <meta name="manifest.type" content="browser_action" />
   </head>
-  <body
-    class="min-h-[478px] min-w-[336px] bg-background p-6 m-0 place-items-center"
-  >
+  <body class="w-[336px] bg-background p-4 m-0 place-items-center">
     <div id="app" class="h-full w-full">
       <div class="flex justify-between items-center w-full">
         <p
@@ -18,16 +16,27 @@
         </p>
         <p></p>
         <div class="flex gap-3">
-          <img
-            src="/assets/icons/settings.svg"
-            class="select-none cursor-pointer"
-            alt="settings logo"
-          />
+          <a
+            href="https://github.com/stonewukong/ctrlex"
+            target="_blank"
+            rel="noreferrer noopener"
+          >
+            <img
+              src="/assets/icons/github.svg"
+              class="select-none cursor-pointer"
+              alt="github repo"
+            />
+          </a>
           <img
             src="/assets/icons/theme.svg"
             class="select-none cursor-pointer"
             alt="theme logo"
           />
+          <!-- <img
+            src="/assets/icons/settings.svg"
+            class="select-none cursor-pointer"
+            alt="settings logo"
+          /> -->
         </div>
       </div>
       <div class="flex mt-6 items-center gap-2 w-full">
@@ -42,15 +51,15 @@
           <p id="extensionsCount" class="text-tertiary text-xs select-none"></p>
         </div>
       </div>
-      <div class="mt-3 w-full h-full">
-        <div class="flex justify-between gap-2 w-full">
+      <div class="mt-3 w-full max-h-full">
+        <div class="flex justify-between gap-2">
           <input
             type="text"
-            id="search"
+            id="search-ex"
             placeholder="Search Extensions"
-            class="border border-btn-border bg-transparent text-sm rounded-xl shadow-sm block px-3 py-2 text-content placeholder-gray-400 focus:border-neutral-600 focus:outline-none"
+            class="border border-btn-border w-48 bg-transparent text-sm rounded-xl shadow-sm block px-3 py-2 text-content placeholder-gray-400 focus:border-neutral-600 focus:outline-none"
           />
-          <div class="relative rounded-xl w-24 h-full">
+          <div class="relative rounded-xl w-44 h-full">
             <select
               id="dropdown"
               class="block px-4 py-2 text-sm w-full text-content bg-btn-bg rounded-xl shadow-sm focus:ring-neutral-500 focus:outline-none focus:border-neutral-500 appearance-none"
@@ -72,7 +81,10 @@
         </div>
 
         <div class="mt-3">
-          <ul id="extensionsList" class="flex-col flex gap-2"></ul>
+          <ul
+            id="extensionsList"
+            class="flex-col flex gap-2 max-h-[268px] overflow-y-scroll"
+          ></ul>
         </div>
       </div>
     </div>

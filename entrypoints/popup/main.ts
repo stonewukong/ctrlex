@@ -64,7 +64,7 @@ function createExtensionItem(
 
   // Extension Name
   const exName = document.createElement('p');
-  exName.className = 'text-ellipsis max-w-44 truncate';
+  exName.className = 'text-ellipsis text-sm max-w-48 truncate';
   exName.textContent = ex.name;
   exElementDiv.appendChild(exName);
 
@@ -72,16 +72,16 @@ function createExtensionItem(
   const actionContainer = document.createElement('div');
   actionContainer.className = 'flex gap-2 items-center';
 
-  const detailsSVG = `
-  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#b4b4b4" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-info hover:stroke-white duration-200 transition-colors">
-    <circle cx="12" cy="12" r="10"></circle>
-    <path d="M12 16v-4"></path>
-    <path d="M12 8h.01"></path>
-  </svg>
-`;
-  const detailsIcon = document.createElement('div');
-  detailsIcon.innerHTML = detailsSVG;
-  actionContainer.appendChild(detailsIcon);
+  //   const detailsSVG = `
+  //   <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#b4b4b4" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-info hover:stroke-white duration-200 transition-colors">
+  //     <circle cx="12" cy="12" r="10"></circle>
+  //     <path d="M12 16v-4"></path>
+  //     <path d="M12 8h.01"></path>
+  //   </svg>
+  // `;
+  //   const detailsIcon = document.createElement('div');
+  //   detailsIcon.innerHTML = detailsSVG;
+  // actionContainer.appendChild(detailsIcon);
 
   const toggleLabel = document.createElement('label');
   toggleLabel.className = 'inline-flex items-center cursor-pointer';
