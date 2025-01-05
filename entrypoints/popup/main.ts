@@ -79,7 +79,7 @@ function createExtensionItem(
 ): HTMLLIElement {
   const exElement = document.createElement('li');
   exElement.className =
-    'p-3 gap-1.5 items-center hover:bg-selected-btn/10 cursor-pointer duration-300 transition-colors rounded-xl flex border border-btn-border/80 w-full justify-between';
+    'p-3 gap-1.5 items-center hover:bg-selected-btn/10 cursor-pointer duration-300 transition-colors rounded-xl flex border border-btn-border w-full justify-between';
 
   let isEnabled = ex.enabled;
   const exElementDiv = document.createElement('div');
@@ -107,7 +107,7 @@ function createExtensionItem(
 
   // Extension Name
   const exName = document.createElement('p');
-  exName.className = 'text-ellipsis text-sm max-w-48 truncate';
+  exName.className = 'text-ellipsis text-sm max-w-48 truncate text-content';
   exName.textContent = ex.name;
   exElementDiv.appendChild(exName);
 

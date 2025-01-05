@@ -14,14 +14,26 @@
     -moz-osx-font-smoothing: grayscale;
     -webkit-text-size-adjust: 100%;
 
-    /* Dark Variables */
-    --color-background: 0deg, 0%, 11%;
-    --color-content: 0deg 0% 98%;
-    --color-selected-btn: 0deg 0% 96%;
-    --color-btn-border: 0deg 0% 20%;
-    --color-btn-bg: 0deg, 0%, 16%;
-    --color-tertiary: 0deg, 0%, 71%;
-    --color-sub-heading: 0deg, 0%, 91%;
+    --color-background: 0deg, 0%, 100%;
+    --color-content: 0deg, 0%, 0%;
+    --color-selected-btn: 0deg, 0%, 91%;
+    --color-btn-border: 0deg, 0%, 85%;
+    --color-btn-bg: 214deg, 21%, 95%;
+    --color-tertiary: 0deg, 0%, 0%;
+    --color-sub-heading: 0deg, 0%, 50%;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      /* Dark Variables */
+      --color-background: 0deg, 0%, 11%;
+      --color-content: 0deg 0% 98%;
+      --color-selected-btn: 0deg 0% 96%;
+      --color-btn-border: 0deg 0% 20%;
+      --color-btn-bg: 0deg, 0%, 16%;
+      --color-tertiary: 0deg, 0%, 71%;
+      --color-sub-heading: 0deg, 0%, 91%;
+    }
   }
 }
 
@@ -39,30 +51,27 @@
   font-style: normal;
 }
 
-/* Apply the styles to all scrollable elements */
-::-webkit-scrollbar {
-  width: 8px;
+/* ::-webkit-scrollbar {
+  width: 6px;
   height: 4px !important;
 }
 
-/* Track (background of the scrollbar) */
+
 ::-webkit-scrollbar-track {
   background: transparent;
-  border-radius: 10px;
+  margin-top: 5px;
 }
 
-/* Thumb (the draggable part) */
 ::-webkit-scrollbar-thumb {
   background: #5b5b5b;
-  border-radius: 10px;
 }
 
-/* Hover effect for the thumb */
+
 ::-webkit-scrollbar-thumb:hover {
   background: #909090;
 }
 
-/* Corner (intersection of vertical and horizontal scrollbars) */
+
 ::-webkit-scrollbar-corner {
   background: transparent;
-}
+}  */
