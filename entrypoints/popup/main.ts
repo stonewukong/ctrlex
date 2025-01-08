@@ -8,6 +8,16 @@ document.addEventListener('DOMContentLoaded', async () => {
   const extensionsList =
     document.querySelector<HTMLParagraphElement>('#extensionsList');
 
+  const powerIcon = document.getElementById('power-icon') as HTMLElement;
+  const powerOffIcon = document.getElementById('power-off-icon') as HTMLElement;
+
+  const toggleDiv = document.getElementById('toggle-all');
+  if (toggleDiv) {
+    toggleDiv.addEventListener('click', () =>
+      toggleAllExtensions(powerIcon, powerOffIcon)
+    );
+  }
+
   if (extensionsCount) {
     extensionsCount.innerText = extensions.length.toString();
   }
@@ -33,6 +43,16 @@ document.addEventListener('DOMContentLoaded', async () => {
     filterExtensions(filter.value, exListItems);
   });
 });
+
+function toggleAllExtensions(
+  powerIcon: HTMLElement,
+  powerOffIcon: HTMLElement
+) {
+  if (powerIcon && powerOffIcon) {
+    powerIcon.classList.toggle('hidden');
+    powerOffIcon.classList.toggle('hidden');
+  }
+}
 
 function filterExtensions(
   filterValue: string,
@@ -136,19 +156,10 @@ function createExtensionItem(
 
   toggleInput.addEventListener('change', () => {
     isEnabled = !isEnabled;
-
-    openAddonsPage();
-
     browser.management.setEnabled(ex.id, isEnabled);
   });
 
   return exElement;
-}
-
-function openAddonsPage() {
-  browser.tabs.create({ url: 'about:addons' }).catch((error) => {
-    console.error('Error opening about:addons:', error);
-  });
 }
 
 async function getExtensions(): Promise<chrome.management.ExtensionInfo[]> {

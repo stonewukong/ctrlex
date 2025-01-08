@@ -4,6 +4,6 @@ import { defineConfig } from 'wxt';
 export default defineConfig({
   extensionApi: 'chrome',
   manifest: {
-    permissions: ['management', 'tabs'],
+    permissions: ['management', 'tabs', 'storage'],
   },
 });

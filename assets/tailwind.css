@@ -51,11 +51,9 @@
   font-style: normal;
 }
 
-/* ::-webkit-scrollbar {
+::-webkit-scrollbar {
   width: 6px;
-  height: 4px !important;
 }
-
 
 ::-webkit-scrollbar-track {
   background: transparent;
@@ -64,14 +62,17 @@
 
 ::-webkit-scrollbar-thumb {
   background: #5b5b5b;
+  border-radius: 10px;
 }
-
 
 ::-webkit-scrollbar-thumb:hover {
   background: #909090;
 }
 
-
 ::-webkit-scrollbar-corner {
   background: transparent;
-}  */
+}
+
+#extensionsList {
+  scrollbar-gutter: auto;
+}
