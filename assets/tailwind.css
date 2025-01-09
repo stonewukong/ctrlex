@@ -56,8 +56,9 @@
 }
 
 ::-webkit-scrollbar-track {
-  background: transparent;
+  background: #9090900f;
   margin-top: 5px;
+  border-radius: 10px;
 }
 
 ::-webkit-scrollbar-thumb {
@@ -75,4 +76,54 @@
 
 #extensionsList {
   scrollbar-gutter: auto;
+}
+
+.active-tab {
+  border-bottom: 1px solid #fafafa;
+  color: #fafafa;
+}
+
+/* .tooltip {
+  @apply invisible absolute opacity-0 transform translate-y-2 bottom-8 -right-8 transition-transform duration-200;
+}
+
+.has-tooltip:hover .tooltip {
+  @apply visible opacity-100 translate-y-0 z-50;
+} */
+
+.tooltip-container {
+  position: relative;
+}
+
+.tooltip {
+  visibility: hidden;
+  width: 120px;
+  background-color: #333;
+  color: #fff;
+  text-align: center;
+  border-radius: 8px;
+  padding: 5px;
+  position: absolute;
+  z-index: 1;
+  bottom: 125%;
+  left: 50%;
+  margin-left: -60px; /* Center the tooltip */
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+.tooltip::after {
+  content: '';
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  margin-left: -5px;
+  border-width: 5px;
+  border-style: solid;
+  border-color: #333 transparent transparent transparent;
+}
+
+.tooltip-container:hover .tooltip {
+  visibility: visible;
+  opacity: 1;
 }

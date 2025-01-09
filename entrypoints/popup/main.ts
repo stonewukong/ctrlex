@@ -1,12 +1,24 @@
 import '../../assets/tailwind.css';
+type FilterType = 'all' | 'enabled' | 'disabled';
 
 document.addEventListener('DOMContentLoaded', async () => {
   let extensions = await getExtensions();
 
-  const modesTab = document.getElementById('modes-tab');
   const extensionsTab = document.getElementById('extensions-tab');
-  const modesContent = document.getElementById('modes-content');
+  const modesTab = document.getElementById('modes-tab');
   const extensionsContent = document.getElementById('extensions-content');
+  const modesContent = document.getElementById('modes-content');
+
+  extensionsTab?.classList.add('active-tab');
+  extensionsContent?.classList.remove('hidden');
+  modesContent?.classList.add('hidden');
+
+  extensionsTab?.addEventListener('click', () => {
+    extensionsTab.classList.add('active-tab');
+    modesTab?.classList.remove('active-tab');
+    extensionsContent?.classList.remove('hidden');
+    modesContent?.classList.add('hidden');
+  });
 
   modesTab?.addEventListener('click', () => {
     modesTab.classList.add('active-tab');
@@ -15,28 +27,11 @@ document.addEventListener('DOMContentLoaded', async () => {
     extensionsContent?.classList.add('hidden');
   });
 
-  extensionsTab?.addEventListener('click', () => {
-    extensionsTab?.classList.add('active-tab');
-    modesTab?.classList.remove('active-tab');
-    extensionsContent?.classList.remove('hidden');
-    modesContent?.classList.add('hidden');
-  });
-
   const extensionsCount =
     document.querySelector<HTMLParagraphElement>('#extensionsCount');
 
   const extensionsList =
     document.querySelector<HTMLParagraphElement>('#extensionsList');
-
-  const powerIcon = document.getElementById('power-icon') as HTMLElement;
-  const powerOffIcon = document.getElementById('power-off-icon') as HTMLElement;
-
-  const toggleDiv = document.getElementById('toggle-all');
-  if (toggleDiv) {
-    toggleDiv.addEventListener('click', () =>
-      toggleAllExtensions(powerIcon, powerOffIcon)
-    );
-  }
 
   if (extensionsCount) {
     extensionsCount.innerText = extensions.length.toString();
@@ -57,32 +52,38 @@ document.addEventListener('DOMContentLoaded', async () => {
     searchExtensions(search, exListItems)
   );
 
-  const filter = document.querySelector<HTMLSelectElement>('#filter');
+  const filterButtons = document.querySelectorAll<HTMLButtonElement>('#filter');
 
-  filter?.addEventListener('change', () => {
-    filterExtensions(filter.value, exListItems);
+  filterButtons.forEach((button) => {
+    button.addEventListener('click', (e) => {
+      const filterValue = (e.currentTarget as HTMLElement).textContent
+        ?.trim()
+        .toLowerCase() as FilterType;
+
+      filterButtons.forEach((btn) =>
+        btn.classList.replace('bg-selected-btn/30', 'bg-btn-bg')
+      );
+
+      button.classList.replace('bg-btn-bg', 'bg-selected-btn/30');
+      button.classList.replace(
+        'hover:bg-selected-btn/20',
+        'hover:bg-selected-btn/30'
+      );
+
+      filterExtensions(filterValue, exListItems);
+    });
   });
 });
 
-function toggleAllExtensions(
-  powerIcon: HTMLElement,
-  powerOffIcon: HTMLElement
-) {
-  if (powerIcon && powerOffIcon) {
-    powerIcon.classList.toggle('hidden');
-    powerOffIcon.classList.toggle('hidden');
-  }
-}
-
 function filterExtensions(
-  filterValue: string,
+  filterValue: FilterType,
   exListItems: NodeListOf<HTMLLIElement> | undefined
 ) {
+  if (!exListItems) return;
+
   exListItems?.forEach((ex) => {
     const toggleElement = ex.querySelector<HTMLInputElement>('input');
-
     if (!toggleElement) return;
-
     const isChecked = toggleElement.checked;
     switch (filterValue) {
       case 'enabled':
