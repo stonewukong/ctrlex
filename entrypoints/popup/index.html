@@ -6,7 +6,7 @@
     <title>Default Popup Title</title>
     <meta name="manifest.type" content="browser_action" />
   </head>
-  <body class="max-w-[336px] bg-background">
+  <body class="max-w-[336px] w-[336px] bg-background">
     <div
       id="app"
       class="p-4 m-0 w-full place-items-center h-[478px] bg-background"
@@ -17,7 +17,7 @@
         >
           ctrlex
         </p>
-        <p></p>
+        <!-- github -->
         <div class="flex gap-3">
           <a
             href="https://github.com/stonewukong/ctrlex"
@@ -45,100 +45,126 @@
         </div>
       </div>
 
-      <div class="flex mt-6 justify-between items-center gap-2 w-full">
-        <div class="flex items-center gap-2">
-          <p
-            class="text-sub-heading text-base mb-[3px] font-medium tracking-wide select-none"
-          >
-            Extensions
-          </p>
-          <div
-            class="bg-btn-bg flex items-center justify-center px-3.5 py-3 w-6 h-6 rounded-full"
-          >
-            <p
-              id="extensionsCount"
-              class="text-tertiary text-xs select-none"
-            ></p>
-          </div>
-        </div>
-        <div id="toggle-all" class="flex items-center gap-1 cursor-pointer">
-          <svg
-            id="power-icon"
-            xmlns="http://www.w3.org/2000/svg"
-            width="16"
-            height="16"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            class="lucide lucide-power stroke-neutral-300 hover:stroke-neutral-50 transition-colors duration-200"
-            aria-label="disable active extensions"
-          >
-            <path d="M12 2v10" />
-            <path d="M18.4 6.6a9 9 0 1 1-12.77.04" />
-          </svg>
-
-          <svg
-            id="power-off-icon"
-            xmlns="http://www.w3.org/2000/svg"
-            width="16"
-            height="16"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            class="lucide lucide-power-off stroke-neutral-300 hover:stroke-neutral-50 transition-colors duration-200 hidden"
-            aria-label="enable active extensions"
-          >
-            <path d="M18.36 6.64A9 9 0 0 1 20.77 15" />
-            <path d="M6.16 6.16a9 9 0 1 0 12.68 12.68" />
-            <path d="M12 2v4" />
-            <path d="m2 2 20 20" />
-          </svg>
-        </div>
+      <div class="flex mt-3 w-full">
+        <button
+          id="modes-tab"
+          class="w-1/2 p-2 text-center text-sm border-b border-btn-border cursor-pointer active-tab"
+        >
+          Modes
+        </button>
+        <button
+          id="extensions-tab"
+          class="w-1/2 p-2 text-sm text-center border-b border-btn-border cursor-pointer"
+        >
+          Extensions
+        </button>
       </div>
-      <div class="mt-3 w-full max-h-full">
-        <div class="flex justify-between gap-2">
-          <input
-            type="text"
-            id="search-ex"
-            placeholder="Search Extensions"
-            class="border border-btn-border w-44 bg-transparent text-sm rounded-xl shadow-sm block px-3 py-2 text-content placeholder-gray-400 focus:border-neutral-600 focus:outline-none"
-          />
-          <div class="relative rounded-xl w-[180px] h-full">
-            <select
-              id="filter"
-              class="block px-4 py-2 text-sm h-[37.6px] w-full text-content bg-btn-bg rounded-xl shadow-sm focus:ring-neutral-500 focus:outline-none focus:border-neutral-500 appearance-none"
+
+      <!-- Modes Content -->
+      <div id="modes-content" class="mt-4 w-full">
+        <p class="text-sm text-center text-gray-600">
+          Modes content goes here.
+        </p>
+      </div>
+
+      <!-- Extensions Content -->
+      <div id="extensions-content" class="mt-4 w-full hidden">
+        <div class="flex justify-between items-center gap-2 w-full">
+          <div class="flex items-center gap-2">
+            <p
+              class="text-sub-heading text-base mb-[3px] font-medium tracking-wide select-none"
             >
-              <option value="" hidden>Filter</option>
-              <option value="all">All</option>
-              <option value="enabled">Enabled</option>
-              <option value="disabled">Disabled</option>
-            </select>
+              Extensions
+            </p>
             <div
-              class="absolute inset-y-0 mb-[2px] right-0 flex items-center pr-3 pointer-events-none"
+              class="bg-btn-bg flex items-center justify-center px-3.5 py-3 w-6 h-6 rounded-full"
             >
-              <img
-                src="/assets/icons/filter.svg"
-                class="select-none cursor-pointer"
-                alt="filter logo"
-              />
+              <p
+                id="extensionsCount"
+                class="text-tertiary text-xs select-none"
+              ></p>
             </div>
           </div>
-        </div>
-
-        <div class="mt-3 h-full">
-          <ul
-            id="extensionsList"
-            class="flex-col flex gap-2 overflow-y-auto"
-            style="max-height: 262px"
-          >
+          <div id="toggle-all" class="flex items-center gap-1 cursor-pointer">
+            <!-- toggle all -->
+            <svg
+              id="power-icon"
+              xmlns="http://www.w3.org/2000/svg"
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              class="lucide lucide-power stroke-neutral-300 hover:stroke-neutral-50 transition-colors duration-200"
+              aria-label="disable active extensions"
             >
-          </ul>
+              <path d="M12 2v10" />
+              <path d="M18.4 6.6a9 9 0 1 1-12.77.04" />
+            </svg>
+
+            <svg
+              id="power-off-icon"
+              xmlns="http://www.w3.org/2000/svg"
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              class="lucide lucide-power-off stroke-neutral-300 hover:stroke-neutral-50 transition-colors duration-200 hidden"
+              aria-label="enable active extensions"
+            >
+              <path d="M18.36 6.64A9 9 0 0 1 20.77 15" />
+              <path d="M6.16 6.16a9 9 0 1 0 12.68 12.68" />
+              <path d="M12 2v4" />
+              <path d="m2 2 20 20" />
+            </svg>
+          </div>
+        </div>
+        <div class="mt-3 w-full max-h-full">
+          <div class="flex justify-between gap-2">
+            <input
+              type="text"
+              id="search-ex"
+              placeholder="Search Extensions"
+              class="border border-btn-border w-44 bg-transparent text-sm rounded-xl shadow-sm block px-3 py-2 text-content placeholder-gray-400 focus:border-neutral-600 focus:outline-none"
+            />
+            <div class="relative rounded-xl w-[180px] h-full">
+              <select
+                id="filter"
+                class="block px-4 py-2 text-sm h-[37.6px] w-full text-content bg-btn-bg rounded-xl shadow-sm focus:ring-neutral-500 focus:outline-none focus:border-neutral-500 appearance-none"
+              >
+                <option value="" hidden>Filter</option>
+                <option value="all">All</option>
+                <option value="enabled">Enabled</option>
+                <option value="disabled">Disabled</option>
+              </select>
+              <div
+                class="absolute inset-y-0 mb-[2px] right-0 flex items-center pr-3 pointer-events-none"
+              >
+                <img
+                  src="/assets/icons/filter.svg"
+                  class="select-none cursor-pointer"
+                  alt="filter logo"
+                />
+              </div>
+            </div>
+          </div>
+
+          <div class="mt-3 h-full">
+            <ul
+              id="extensionsList"
+              class="flex-col flex gap-2 overflow-y-auto"
+              style="max-height: 262px"
+            >
+              >
+            </ul>
+          </div>
         </div>
       </div>
     </div>

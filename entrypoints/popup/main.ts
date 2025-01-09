@@ -2,6 +2,26 @@ import '../../assets/tailwind.css';
 
 document.addEventListener('DOMContentLoaded', async () => {
   let extensions = await getExtensions();
+
+  const modesTab = document.getElementById('modes-tab');
+  const extensionsTab = document.getElementById('extensions-tab');
+  const modesContent = document.getElementById('modes-content');
+  const extensionsContent = document.getElementById('extensions-content');
+
+  modesTab?.addEventListener('click', () => {
+    modesTab.classList.add('active-tab');
+    extensionsTab?.classList.remove('active-tab');
+    modesContent?.classList.remove('hidden');
+    extensionsContent?.classList.add('hidden');
+  });
+
+  extensionsTab?.addEventListener('click', () => {
+    extensionsTab?.classList.add('active-tab');
+    modesTab?.classList.remove('active-tab');
+    extensionsContent?.classList.remove('hidden');
+    modesContent?.classList.add('hidden');
+  });
+
   const extensionsCount =
     document.querySelector<HTMLParagraphElement>('#extensionsCount');
 
