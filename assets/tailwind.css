@@ -83,14 +83,6 @@
   color: #fafafa;
 }
 
-/* .tooltip {
-  @apply invisible absolute opacity-0 transform translate-y-2 bottom-8 -right-8 transition-transform duration-200;
-}
-
-.has-tooltip:hover .tooltip {
-  @apply visible opacity-100 translate-y-0 z-50;
-} */
-
 .tooltip-container {
   position: relative;
 }

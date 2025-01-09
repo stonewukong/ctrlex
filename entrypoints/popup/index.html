@@ -81,6 +81,7 @@
           </div>
 
           <div class="flex justify-between items-center mt-3.5">
+            <!-- filter buttons -->
             <div>
               <button
                 id="filter"
@@ -123,7 +124,7 @@
               </div>
 
               <label class="cursor-pointer">
-                <input type="checkbox" class="sr-only peer" />
+                <input id="toggle-all" type="checkbox" class="sr-only peer" />
                 <div
                   class="relative w-9 h-5 bg-btn-bg rounded-full peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-red-600"
                 ></div>
@@ -136,9 +137,7 @@
               id="extensionsList"
               class="flex-col flex gap-2 overflow-y-auto"
               style="max-height: 265px"
-            >
-              >
-            </ul>
+            ></ul>
           </div>
         </div>
       </div>

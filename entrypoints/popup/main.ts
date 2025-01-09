@@ -1,5 +1,10 @@
 import '../../assets/tailwind.css';
+
 type FilterType = 'all' | 'enabled' | 'disabled';
+interface ExtensionStorage {
+  enabledExtensions: string[];
+  toggleAllState: boolean;
+}
 
 document.addEventListener('DOMContentLoaded', async () => {
   let extensions = await getExtensions();
@@ -8,6 +13,16 @@ document.addEventListener('DOMContentLoaded', async () => {
   const modesTab = document.getElementById('modes-tab');
   const extensionsContent = document.getElementById('extensions-content');
   const modesContent = document.getElementById('modes-content');
+  const toggleAll = document.querySelector<HTMLInputElement>('#toggle-all');
+
+  const savedState: ExtensionStorage = await browser.storage.sync.get({
+    enabledExtensions: [],
+    toggleAllState: false,
+  });
+
+  if (toggleAll) {
+    toggleAll.checked = savedState.toggleAllState;
+  }
 
   extensionsTab?.classList.add('active-tab');
   extensionsContent?.classList.remove('hidden');
@@ -31,7 +46,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     document.querySelector<HTMLParagraphElement>('#extensionsCount');
 
   const extensionsList =
-    document.querySelector<HTMLParagraphElement>('#extensionsList');
+    document.querySelector<HTMLUListElement>('#extensionsList');
 
   if (extensionsCount) {
     extensionsCount.innerText = extensions.length.toString();
@@ -39,12 +54,11 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   if (extensionsList) {
     extensionsList.innerHTML = '';
+    extensions.forEach((ex) => {
+      const extensionItem = createExtensionItem(ex);
+      extensionsList.appendChild(extensionItem);
+    });
   }
-
-  extensions.forEach((ex) => {
-    const extensionItem = createExtensionItem(ex);
-    extensionsList?.appendChild(extensionItem);
-  });
 
   const search = document.querySelector<HTMLInputElement>('#search-ex');
   const exListItems = extensionsList?.querySelectorAll('li');
@@ -72,6 +86,35 @@ document.addEventListener('DOMContentLoaded', async () => {
 
       filterExtensions(filterValue, exListItems);
     });
+  });
+
+  toggleAll?.addEventListener('change', async () => {
+    const newState = toggleAll.checked;
+
+    await browser.storage.sync.set({ toggleAllState: newState });
+
+    if (newState) {
+      const enabledExtensions = extensions
+        .filter((ex) => ex.enabled && ex.id !== browser.runtime.id)
+        .map((ex) => ex.id);
+
+      await browser.storage.sync.set({ enabledExtensions });
+
+      for (const ex of extensions) {
+        if (ex.id !== browser.runtime.id && ex.enabled) {
+          await browser.management.setEnabled(ex.id, false);
+        }
+      }
+    } else {
+      const savedExtensions = await browser.storage.sync.get(
+        'enabledExtensions'
+      );
+      if (savedExtensions.enabledExtensions) {
+        for (const extId of savedExtensions.enabledExtensions) {
+          await browser.management.setEnabled(extId, true);
+        }
+      }
+    }
   });
 });
 
@@ -178,6 +221,27 @@ function createExtensionItem(
   toggleInput.addEventListener('change', () => {
     isEnabled = !isEnabled;
     browser.management.setEnabled(ex.id, isEnabled);
+  });
+
+  toggleInput.addEventListener('change', async () => {
+    isEnabled = !isEnabled;
+    await browser.management.setEnabled(ex.id, isEnabled);
+
+    // Update storage when individual extensions are toggled
+    const savedState = await browser.storage.sync.get({
+      enabledExtensions: [],
+    });
+    let enabledExtensions = savedState.enabledExtensions;
+
+    if (isEnabled) {
+      enabledExtensions.push(ex.id);
+    } else {
+      enabledExtensions = enabledExtensions.filter(
+        (id: string) => id !== ex.id
+      );
+    }
+
+    await browser.storage.sync.set({ enabledExtensions });
   });
 
   return exElement;
