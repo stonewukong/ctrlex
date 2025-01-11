@@ -75,13 +75,13 @@ document.addEventListener('DOMContentLoaded', async () => {
         .toLowerCase() as FilterType;
 
       filterButtons.forEach((btn) =>
-        btn.classList.replace('bg-selected-btn/30', 'bg-btn-bg')
+        btn.classList.replace('bg-selected-btn/10', 'bg-btn-bg')
       );
 
-      button.classList.replace('bg-btn-bg', 'bg-selected-btn/30');
+      button.classList.replace('bg-btn-bg', 'bg-selected-btn/10');
       button.classList.replace(
-        'hover:bg-selected-btn/20',
-        'hover:bg-selected-btn/30'
+        'hover:bg-selected-btn/5',
+        'hover:bg-selected-btn/10'
       );
 
       filterExtensions(filterValue, exListItems);
