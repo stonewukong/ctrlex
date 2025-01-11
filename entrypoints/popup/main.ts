@@ -28,20 +28,19 @@ document.addEventListener('DOMContentLoaded', async () => {
     toggleAll.checked = savedState.toggleAllState;
   }
 
-  extensionsTab?.classList.add('active-tab');
   extensionsContent?.classList.remove('hidden');
   modesContent?.classList.add('hidden');
 
   extensionsTab?.addEventListener('click', () => {
-    extensionsTab.classList.add('active-tab');
-    modesTab?.classList.remove('active-tab');
+    extensionsTab?.classList.replace('bg-btn-border/15', 'bg-btn-border/50');
+    modesTab?.classList.replace('bg-btn-border/50', 'bg-btn-border/15');
     extensionsContent?.classList.remove('hidden');
     modesContent?.classList.add('hidden');
   });
 
   modesTab?.addEventListener('click', () => {
-    modesTab.classList.add('active-tab');
-    extensionsTab?.classList.remove('active-tab');
+    modesTab.classList.replace('bg-btn-border/15', 'bg-btn-border/50');
+    extensionsTab?.classList.replace('bg-btn-border/50', 'bg-btn-border/15');
     modesContent?.classList.remove('hidden');
     extensionsContent?.classList.add('hidden');
   });

@@ -78,11 +78,6 @@
   scrollbar-gutter: auto;
 }
 
-.active-tab {
-  border-bottom: 1px solid #fafafa;
-  color: #fafafa;
-}
-
 .tooltip-container {
   position: relative;
 }
