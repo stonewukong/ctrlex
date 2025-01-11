@@ -14,6 +14,10 @@ document.addEventListener('DOMContentLoaded', async () => {
   const extensionsContent = document.getElementById('extensions-content');
   const modesContent = document.getElementById('modes-content');
   const toggleAll = document.querySelector<HTMLInputElement>('#toggle-all');
+  const extensionsCount =
+    document.querySelector<HTMLParagraphElement>('#extensionsCount');
+  const extensionsList =
+    document.querySelector<HTMLUListElement>('#extensionsList');
 
   const savedState: ExtensionStorage = await browser.storage.sync.get({
     enabledExtensions: [],
@@ -42,11 +46,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     extensionsContent?.classList.add('hidden');
   });
 
-  const extensionsCount =
-    document.querySelector<HTMLParagraphElement>('#extensionsCount');
-
-  const extensionsList =
-    document.querySelector<HTMLUListElement>('#extensionsList');
+  toggleAll?.addEventListener('change', () =>
+    toggleAllExtensions(toggleAll, extensions, extensionsList)
+  );
 
   if (extensionsCount) {
     extensionsCount.innerText = extensions.length.toString();
@@ -87,36 +89,63 @@ document.addEventListener('DOMContentLoaded', async () => {
       filterExtensions(filterValue, exListItems);
     });
   });
+});
 
-  toggleAll?.addEventListener('change', async () => {
-    const newState = toggleAll.checked;
+async function toggleAllExtensions(
+  toggleAll: HTMLInputElement | null,
+  extensions: chrome.management.ExtensionInfo[],
+  extensionsList: HTMLUListElement | null
+) {
+  const newState = toggleAll?.checked;
 
-    await browser.storage.sync.set({ toggleAllState: newState });
+  await browser.storage.sync.set({ toggleAllState: newState });
 
-    if (newState) {
-      const enabledExtensions = extensions
-        .filter((ex) => ex.enabled && ex.id !== browser.runtime.id)
-        .map((ex) => ex.id);
+  if (newState) {
+    const enabledExtensions = extensions
+      .filter((ex) => ex.enabled && ex.id !== browser.runtime.id)
+      .map((ex) => ex.id);
 
-      await browser.storage.sync.set({ enabledExtensions });
+    await browser.storage.sync.set({ enabledExtensions });
 
-      for (const ex of extensions) {
-        if (ex.id !== browser.runtime.id && ex.enabled) {
-          await browser.management.setEnabled(ex.id, false);
-        }
-      }
-    } else {
-      const savedExtensions = await browser.storage.sync.get(
-        'enabledExtensions'
-      );
-      if (savedExtensions.enabledExtensions) {
-        for (const extId of savedExtensions.enabledExtensions) {
-          await browser.management.setEnabled(extId, true);
-        }
+    for (const ex of extensions) {
+      if (ex.id !== browser.runtime.id && ex.enabled) {
+        await browser.management.setEnabled(ex.id, false);
       }
     }
-  });
-});
+
+    extensionsList?.classList.add('opacity-40');
+    extensionsList?.querySelectorAll('li').forEach((li) => {
+      li.classList.add('pointer-events-none');
+      const toggleDiv = li.querySelector('#toggle-ex');
+
+      if (toggleDiv) {
+        toggleDiv.classList.replace(
+          'peer-checked:bg-blue-600',
+          'peer-checked:bg-red-600'
+        );
+      }
+    });
+  } else {
+    const savedExtensions = await browser.storage.sync.get('enabledExtensions');
+    if (savedExtensions.enabledExtensions) {
+      for (const extId of savedExtensions.enabledExtensions) {
+        await browser.management.setEnabled(extId, true);
+      }
+    }
+    extensionsList?.classList.remove('opacity-40');
+    extensionsList?.querySelectorAll('li').forEach((li) => {
+      li.classList.remove('pointer-events-none');
+      const toggleDiv = li.querySelector('#toggle-ex');
+      console.log(toggleDiv);
+      if (toggleDiv) {
+        toggleDiv.classList.replace(
+          'peer-checked:bg-red-600',
+          'peer-checked:bg-blue-600'
+        );
+      }
+    });
+  }
+}
 
 function filterExtensions(
   filterValue: FilterType,
@@ -163,7 +192,7 @@ function createExtensionItem(
 ): HTMLLIElement {
   const exElement = document.createElement('li');
   exElement.className =
-    'p-3 gap-1.5 items-center hover:bg-selected-btn/10 cursor-pointer duration-300 transition-colors rounded-xl flex border border-btn-border w-full justify-between';
+    'p-3 gap-1.5 items-center hover:bg-selected-btn/10 select-none duration-300 transition-colors rounded-xl flex border border-btn-border w-full justify-between';
 
   let isEnabled = ex.enabled;
   const exElementDiv = document.createElement('div');
@@ -210,7 +239,7 @@ function createExtensionItem(
   const toggleDiv = document.createElement('div');
   toggleDiv.className =
     'relative w-9 h-5 bg-btn-bg peer-focus:outline-none rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[""] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600';
-
+  toggleDiv.id = 'toggle-ex';
   toggleLabel.appendChild(toggleInput);
   toggleLabel.appendChild(toggleDiv);
   actionContainer.appendChild(toggleLabel);
