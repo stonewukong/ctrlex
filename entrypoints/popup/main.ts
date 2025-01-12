@@ -191,7 +191,7 @@ function createExtensionItem(
 ): HTMLLIElement {
   const exElement = document.createElement('li');
   exElement.className =
-    'p-3 gap-1.5 items-center hover:bg-selected-btn/10 select-none duration-300 transition-colors rounded-xl flex border border-btn-border w-full justify-between';
+    'p-3 gap-1.5 items-center hover:bg-selected-btn/10 select-none duration-300 transition-colors rounded-xl flex border bg-btn-border/10 border-btn-border/40 w-full justify-between';
 
   let isEnabled = ex.enabled;
   const exElementDiv = document.createElement('div');
