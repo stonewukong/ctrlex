@@ -92,7 +92,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   });
 
   addModeBtn?.addEventListener('click', () => {
-    const mode = createModeItem('Lorem ', '');
+    const mode = createModeItem('Lorem ');
 
     modesList?.appendChild(mode);
   });
@@ -283,7 +283,7 @@ function createExtensionItem(
   return exElement;
 }
 
-function createModeItem(title: string, desc: string): HTMLLIElement {
+function createModeItem(title: string): HTMLLIElement {
   const modeContainer = document.createElement('li');
   const modeId = secure();
   modeContainer.className =
@@ -298,12 +298,29 @@ function createModeItem(title: string, desc: string): HTMLLIElement {
   const titleContainer = document.createElement('p');
   titleContainer.className = 'text-sm font-medium text-content';
   titleContainer.textContent = title;
-  const descContainer = document.createElement('p');
-  descContainer.className = 'text-xs text-tertiary';
-  descContainer.textContent = desc;
+
   titleAndDescContainer.appendChild(titleContainer);
-  titleAndDescContainer.appendChild(descContainer);
+
   modeInfo.appendChild(titleAndDescContainer);
+
+  const settingsToggleContainer = document.createElement('div');
+  settingsToggleContainer.className = 'flex gap-1 items-center';
+
+  const svgContainer = document.createElement('div');
+  svgContainer.innerHTML = `
+  <svg xmlns="http://www.w3.org/2000/svg" 
+       width="18" 
+       height="18" 
+       viewBox="0 0 24 24" 
+       fill="none" 
+       stroke-width="2" 
+       stroke-linecap="round" 
+       stroke-linejoin="round" 
+       class="lucide lucide-settings hover:stroke-neutral-400 transition-colors duration-300 cursor-pointer stroke-neutral-50">
+    <path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/>
+    <circle cx="12" cy="12" r="3"/>
+  </svg>
+`;
 
   const toggleLabel = document.createElement('label');
   toggleLabel.className = 'inline-flex items-center cursor-pointer';
@@ -319,21 +336,11 @@ function createModeItem(title: string, desc: string): HTMLLIElement {
   toggleLabel.appendChild(toggleInput);
   toggleLabel.appendChild(toggleDiv);
 
-  const actionContainer = document.createElement('div');
+  settingsToggleContainer.appendChild(svgContainer);
+  settingsToggleContainer.appendChild(toggleLabel);
 
-  actionContainer.className = 'flex mt-3 space-x-2';
-
-  const editBtn = document.createElement('button');
-  editBtn.className =
-    'px-3 py-1 text-xs text-content bg-selected-btn/10 rounded-xl hover:bg-selected-btn/20 transition-colors duration-200';
-  editBtn.innerText = 'Edit';
-
-  editBtn.addEventListener('click', () => editMode(modeId));
-  actionContainer.appendChild(editBtn);
-
+  modeInfo.appendChild(settingsToggleContainer);
   modeContainer.appendChild(modeInfo);
-  modeInfo.appendChild(toggleLabel);
-  modeContainer.appendChild(actionContainer);
 
   return modeContainer;
 }
