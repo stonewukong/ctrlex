@@ -1,4 +1,5 @@
 import '../../assets/tailwind.css';
+import { v4 as secure } from '@lukeed/uuid/secure';
 
 type FilterType = 'all' | 'enabled' | 'disabled';
 interface ExtensionStorage {
@@ -18,7 +19,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     document.querySelector<HTMLParagraphElement>('#extensionsCount');
   const extensionsList =
     document.querySelector<HTMLUListElement>('#extensionsList');
-
+  const addModeBtn = document.querySelector<HTMLButtonElement>('#add-mode-btn');
+  const modesList = document.querySelector<HTMLButtonElement>('#modes-list');
   const savedState: ExtensionStorage = await browser.storage.sync.get({
     enabledExtensions: [],
     toggleAllState: false,
@@ -87,6 +89,12 @@ document.addEventListener('DOMContentLoaded', async () => {
 
       filterExtensions(filterValue, exListItems);
     });
+  });
+
+  addModeBtn?.addEventListener('click', () => {
+    const mode = createModeItem('Lorem ', '');
+
+    modesList?.appendChild(mode);
   });
 });
 
@@ -273,6 +281,65 @@ function createExtensionItem(
   });
 
   return exElement;
+}
+
+function createModeItem(title: string, desc: string): HTMLLIElement {
+  const modeContainer = document.createElement('li');
+  const modeId = secure();
+  modeContainer.className =
+    'p-4 bg-btn-border/10 rounded-xl hover:bg-btn-border/20 border border-btn-border/40 transition-colors duration-200';
+
+  const modeInfo = document.createElement('div');
+
+  modeInfo.className = 'flex justify-between items-start';
+
+  const titleAndDescContainer = document.createElement('div');
+  titleAndDescContainer.className = 'flex flex-col gap-2';
+  const titleContainer = document.createElement('p');
+  titleContainer.className = 'text-sm font-medium text-content';
+  titleContainer.textContent = title;
+  const descContainer = document.createElement('p');
+  descContainer.className = 'text-xs text-tertiary';
+  descContainer.textContent = desc;
+  titleAndDescContainer.appendChild(titleContainer);
+  titleAndDescContainer.appendChild(descContainer);
+  modeInfo.appendChild(titleAndDescContainer);
+
+  const toggleLabel = document.createElement('label');
+  toggleLabel.className = 'inline-flex items-center cursor-pointer';
+
+  const toggleInput = document.createElement('input');
+  toggleInput.type = 'checkbox';
+  toggleInput.className = 'sr-only peer';
+
+  const toggleDiv = document.createElement('div');
+  toggleDiv.className =
+    'relative w-9 h-5 bg-btn-bg peer-focus:outline-none rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[""] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600';
+  toggleDiv.id = 'toggle-mode';
+  toggleLabel.appendChild(toggleInput);
+  toggleLabel.appendChild(toggleDiv);
+
+  const actionContainer = document.createElement('div');
+
+  actionContainer.className = 'flex mt-3 space-x-2';
+
+  const editBtn = document.createElement('button');
+  editBtn.className =
+    'px-3 py-1 text-xs text-content bg-selected-btn/10 rounded-xl hover:bg-selected-btn/20 transition-colors duration-200';
+  editBtn.innerText = 'Edit';
+
+  editBtn.addEventListener('click', () => editMode(modeId));
+  actionContainer.appendChild(editBtn);
+
+  modeContainer.appendChild(modeInfo);
+  modeInfo.appendChild(toggleLabel);
+  modeContainer.appendChild(actionContainer);
+
+  return modeContainer;
+}
+
+function editMode(modeId: string) {
+  console.log('edit', modeId);
 }
 
 async function getExtensions(): Promise<chrome.management.ExtensionInfo[]> {
