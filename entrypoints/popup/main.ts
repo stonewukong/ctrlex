@@ -2,9 +2,18 @@ import '../../assets/tailwind.css';
 import { v4 as secure } from '@lukeed/uuid/secure';
 
 type FilterType = 'all' | 'enabled' | 'disabled';
+
+interface Mode {
+  id: string;
+  name: string;
+  extensions: string[];
+  enabled: boolean;
+}
+
 interface ExtensionStorage {
   enabledExtensions: string[];
   toggleAllState: boolean;
+  modes: Mode[];
 }
 
 document.addEventListener('DOMContentLoaded', async () => {
@@ -20,10 +29,67 @@ document.addEventListener('DOMContentLoaded', async () => {
   const extensionsList =
     document.querySelector<HTMLUListElement>('#extensionsList');
   const addModeBtn = document.querySelector<HTMLButtonElement>('#add-mode-btn');
+  const saveModeBtn = document.querySelector<HTMLButtonElement>('#save-mode');
+  const cancelModalBtn =
+    document.querySelector<HTMLButtonElement>('#cancel-modal');
+  const modeModal = document.querySelector<HTMLButtonElement>('#mode-modal');
   const modesList = document.querySelector<HTMLButtonElement>('#modes-list');
+  const modeForm = document.getElementById('mode-form') as HTMLFormElement;
+  const modeNameInput = document.getElementById(
+    'mode-name-input'
+  ) as HTMLInputElement;
+  let newModeName: string;
+
+  modeForm.addEventListener('submit', async (event) => {
+    event.preventDefault();
+
+    if (!modeNameInput.value.trim()) {
+      modeNameInput.classList.add('border-red-600');
+      modeNameInput.focus();
+    } else {
+      modeNameInput.classList.remove('border-red-600');
+
+      newModeName = modeNameInput.value.trim();
+
+      modeNameInput.value = '';
+
+      const modeId = secure();
+      const newMode = {
+        id: modeId,
+        name: newModeName,
+        enabled: false,
+        extensions: [],
+      };
+
+      // Save new mode to storage
+      const savedState: ExtensionStorage = await browser.storage.sync.get({
+        modes: [],
+      });
+      const modes = [...savedState.modes, newMode];
+      await saveModesToStorage(modes);
+
+      // Add to the UI
+      const modeItem = createModeItem(
+        modeId,
+        newMode.name,
+        newMode.extensions,
+        newMode.enabled
+      );
+      modesList?.appendChild(modeItem);
+
+      modeModal?.classList.replace('flex', 'hidden');
+    }
+  });
+
+  document.getElementById('cancel-modal')?.addEventListener('click', () => {
+    document.getElementById('mode-modal')?.classList.replace('flex', 'hidden');
+    modeNameInput.classList.remove('border-red-600');
+  });
+
   const savedState: ExtensionStorage = await browser.storage.sync.get({
     enabledExtensions: [],
     toggleAllState: false,
+    modes: [],
   });
 
   if (toggleAll) {
@@ -63,6 +129,18 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
   }
 
+  if (savedState.modes.length > 0 && modesList) {
+    savedState.modes.forEach((mode) => {
+      const modeItem = createModeItem(
+        mode.id,
+        mode.name,
+        mode.extensions,
+        mode.enabled
+      );
+      modesList.appendChild(modeItem);
+    });
+  }
+
   const search = document.querySelector<HTMLInputElement>('#search-ex');
   const exListItems = extensionsList?.querySelectorAll('li');
   search?.addEventListener('input', () =>
@@ -92,9 +170,19 @@ document.addEventListener('DOMContentLoaded', async () => {
   });
 
   addModeBtn?.addEventListener('click', () => {
-    const mode = createModeItem('Lorem ');
+    if (modeModal?.classList.contains('hidden')) {
+      modeModal.classList.replace('hidden', 'flex');
+    } else {
+      modeModal?.classList.replace('flex', 'hidden');
+    }
+  });
 
-    modesList?.appendChild(mode);
+  cancelModalBtn?.addEventListener('click', () => {
+    if (modeModal?.classList.contains('flex')) {
+      modeModal?.classList.replace('flex', 'hidden');
+    }
+
+    modeNameInput.value = '';
   });
 });
 
@@ -283,9 +371,14 @@ function createExtensionItem(
   return exElement;
 }
 
-function createModeItem(title: string): HTMLLIElement {
+function createModeItem(
+  id: string,
+  name: string,
+  extensions: string[],
+  enabled: boolean
+): HTMLLIElement {
   const modeContainer = document.createElement('li');
-  const modeId = secure();
+
   modeContainer.className =
     'p-4 bg-btn-border/10 rounded-xl hover:bg-btn-border/20 border border-btn-border/40 transition-colors duration-200';
 
@@ -297,7 +390,7 @@ function createModeItem(title: string): HTMLLIElement {
   titleAndDescContainer.className = 'flex flex-col gap-2';
   const titleContainer = document.createElement('p');
   titleContainer.className = 'text-sm font-medium text-content';
-  titleContainer.textContent = title;
+  titleContainer.textContent = name;
 
   titleAndDescContainer.appendChild(titleContainer);
 
@@ -342,6 +435,19 @@ function createModeItem(title: string): HTMLLIElement {
   modeInfo.appendChild(settingsToggleContainer);
   modeContainer.appendChild(modeInfo);
 
+  toggleInput.addEventListener('change', async () => {
+    enabled = toggleInput.checked;
+
+    const savedState: ExtensionStorage = await browser.storage.sync.get({
+      modes: [],
+    });
+    const modeToUpdate = savedState.modes.find((mode) => mode.id === id);
+    if (modeToUpdate) {
+      modeToUpdate.enabled = enabled;
+    }
+    await saveModesToStorage(savedState.modes);
+  });
+
   return modeContainer;
 }
 
@@ -382,4 +488,8 @@ async function getExtensionIcon(id: string) {
     console.error('Error fetching extension icon:', error);
     return null;
   }
+}
+
+async function saveModesToStorage(modes: Mode[]) {
+  await browser.storage.sync.set({ modes });
 }
