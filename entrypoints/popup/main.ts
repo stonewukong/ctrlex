@@ -38,6 +38,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   const modeNameInput = document.getElementById(
     'mode-name-input'
   ) as HTMLInputElement;
+
   let newModeName: string;
 
   modeForm.addEventListener('submit', async (event) => {
@@ -183,6 +184,10 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     modeNameInput.value = '';
+  });
+
+  document.getElementById('reset-modal')?.addEventListener('click', () => {
+    resetData();
   });
 });
 
@@ -492,4 +497,8 @@ async function getExtensionIcon(id: string) {
 
 async function saveModesToStorage(modes: Mode[]) {
   await browser.storage.sync.set({ modes });
+}
+
+async function resetData() {
+  await browser.storage.sync.set({ modes: [] });
 }
