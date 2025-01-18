@@ -101,6 +101,8 @@ document.addEventListener('DOMContentLoaded', async () => {
       // Close modal
       modeModal?.classList.replace('flex', 'hidden');
     }
+
+    populateDropdownExtensions();
   });
 
   document.getElementById('cancel-modal')?.addEventListener('click', () => {
@@ -599,8 +601,19 @@ async function populateDropdownExtensions() {
 
     extensions.forEach((extension) => {
       const listItem = createDropdownItem(extension);
+
+      // Reset selection for each item (unselect all initially)
+      const checkIconWrapper = listItem.querySelector(
+        'div:last-child'
+      ) as HTMLElement;
+      checkIconWrapper.classList.add('hidden');
+      listItem.classList.remove('bg-btn-bg');
+
       dropdownMenu.appendChild(listItem);
     });
+
+    // Reset selected count to zero when dropdown is repopulated
+    updateSelectedCount();
   } catch (error) {
     console.error('Error fetching extensions:', error);
     const errorItem = document.createElement('li');
