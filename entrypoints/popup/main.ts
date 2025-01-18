@@ -6,7 +6,10 @@ type FilterType = 'all' | 'enabled' | 'disabled';
 interface Mode {
   id: string;
   name: string;
-  extensions: string[];
+  extensions: {
+    id: string;
+    logo: string;
+  }[];
   enabled: boolean;
 }
 
@@ -30,6 +33,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     document.querySelector<HTMLUListElement>('#extensionsList');
   const addModeBtn = document.querySelector<HTMLButtonElement>('#add-mode-btn');
   const saveModeBtn = document.querySelector<HTMLButtonElement>('#save-mode');
+  // Modal
   const cancelModalBtn =
     document.querySelector<HTMLButtonElement>('#cancel-modal');
   const modeModal = document.querySelector<HTMLButtonElement>('#mode-modal');
@@ -38,8 +42,20 @@ document.addEventListener('DOMContentLoaded', async () => {
   const modeNameInput = document.getElementById(
     'mode-name-input'
   ) as HTMLInputElement;
+  const dropdownTrigger = document.getElementById('select-ex') as HTMLElement;
+  const dropdownMenu = document.getElementById('ex-menu') as HTMLElement;
+  const defaultText = document.getElementById('default-text') as HTMLElement;
+  const countSelected = document.getElementById(
+    'count-selected'
+  ) as HTMLElement;
+  const modeExtensionItems = dropdownMenu.querySelectorAll('li');
 
+  let selectedCount = 0;
   let newModeName: string;
+
+  dropdownTrigger.addEventListener('click', () => {
+    dropdownMenu.classList.toggle('hidden');
+  });
 
   modeForm.addEventListener('submit', async (event) => {
     event.preventDefault();
@@ -54,30 +70,35 @@ document.addEventListener('DOMContentLoaded', async () => {
 
       modeNameInput.value = '';
 
+      // Get selected extensions
+      const selectedExtensions = getSelectedExtensions();
+
+      // Create new mode object
       const modeId = secure();
       const newMode = {
         id: modeId,
         name: newModeName,
+        extensions: selectedExtensions,
         enabled: false,
-        extensions: [],
       };
 
-      // Save new mode to storage
+      // Save to storage
       const savedState: ExtensionStorage = await browser.storage.sync.get({
         modes: [],
       });
       const modes = [...savedState.modes, newMode];
       await saveModesToStorage(modes);
 
-      // Add to the UI
+      // Add mode to UI
       const modeItem = createModeItem(
         modeId,
-        newMode.name,
-        newMode.extensions,
-        newMode.enabled
+        newModeName,
+        selectedExtensions,
+        false
       );
       modesList?.appendChild(modeItem);
 
+      // Close modal
       modeModal?.classList.replace('flex', 'hidden');
     }
   });
@@ -97,6 +118,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     toggleAll.checked = savedState.toggleAllState;
   }
 
+  // extensionsContent?.classList.add('hidden');
+  // modesContent?.classList.remove('hidden');
   extensionsContent?.classList.remove('hidden');
   modesContent?.classList.add('hidden');
 
@@ -189,6 +212,44 @@ document.addEventListener('DOMContentLoaded', async () => {
   document.getElementById('reset-modal')?.addEventListener('click', () => {
     resetData();
   });
+
+  modeExtensionItems.forEach((item) => {
+    item.addEventListener('click', () => {
+      const checkIcon = item.querySelector('svg') as SVGSVGElement;
+      const isSelected = !checkIcon.classList.contains('hidden');
+
+      // Update Selection
+      if (isSelected) {
+        checkIcon.classList.add('hidden');
+        selectedCount--;
+      } else {
+        checkIcon.classList.remove('hidden');
+        selectedCount++;
+      }
+
+      // Update UI
+      if (selectedCount > 0) {
+        defaultText.classList.add('hidden');
+        countSelected.classList.remove('hidden');
+        countSelected.textContent = `${selectedCount} selected`;
+      } else {
+        defaultText.classList.remove('hidden');
+        countSelected.classList.add('hidden');
+      }
+    });
+  });
+
+  // Close Dropdown when clicking outside
+  document.addEventListener('click', (event) => {
+    if (
+      !dropdownTrigger.contains(event.target as Node) &&
+      !dropdownMenu.contains(event.target as Node)
+    ) {
+      dropdownMenu.classList.add('hidden');
+    }
+  });
+
+  populateDropdownExtensions();
 });
 
 async function toggleAllExtensions(
@@ -379,7 +440,10 @@ function createExtensionItem(
 function createModeItem(
   id: string,
   name: string,
-  extensions: string[],
+  extensions: {
+    id: string;
+    logo: string;
+  }[],
   enabled: boolean
 ): HTMLLIElement {
   const modeContainer = document.createElement('li');
@@ -391,18 +455,32 @@ function createModeItem(
 
   modeInfo.className = 'flex justify-between items-start';
 
-  const titleAndDescContainer = document.createElement('div');
-  titleAndDescContainer.className = 'flex flex-col gap-2';
-  const titleContainer = document.createElement('p');
-  titleContainer.className = 'text-sm font-medium text-content';
-  titleContainer.textContent = name;
+  const titleContainer = document.createElement('div');
+  titleContainer.className = 'flex flex-col gap-3';
+  const titleText = document.createElement('p');
+  titleText.className = 'text-sm font-medium text-content';
+  titleText.textContent = name;
 
-  titleAndDescContainer.appendChild(titleContainer);
+  titleContainer.appendChild(titleText);
 
-  modeInfo.appendChild(titleAndDescContainer);
-
+  modeInfo.appendChild(titleContainer);
   const settingsToggleContainer = document.createElement('div');
   settingsToggleContainer.className = 'flex gap-1 items-center';
+
+  const avatarContainer = document.createElement('div');
+  avatarContainer.className =
+    'relative flex items-center flex-wrap justify-start w-full mt-3 gap-[-6px]';
+
+  // Create stacked avatars for each extension logo
+  extensions.forEach((extension, index) => {
+    const avatar = document.createElement('img');
+    avatar.src = extension.logo;
+    avatar.alt = `Logo for ${extension.id}`;
+    avatar.className = `w-5 h-5 rounded-full border border-btn-border shadow-xl bg-btn-bg ${
+      index > 0 ? 'ml-[-9px]' : ''
+    }`;
+    avatarContainer.appendChild(avatar);
+  });
 
   const svgContainer = document.createElement('div');
   svgContainer.innerHTML = `
@@ -439,6 +517,7 @@ function createModeItem(
 
   modeInfo.appendChild(settingsToggleContainer);
   modeContainer.appendChild(modeInfo);
+  modeContainer.appendChild(avatarContainer);
 
   toggleInput.addEventListener('change', async () => {
     enabled = toggleInput.checked;
@@ -454,10 +533,6 @@ function createModeItem(
   });
 
   return modeContainer;
-}
-
-function editMode(modeId: string) {
-  console.log('edit', modeId);
 }
 
 async function getExtensions(): Promise<chrome.management.ExtensionInfo[]> {
@@ -495,10 +570,137 @@ async function getExtensionIcon(id: string) {
   }
 }
 
-async function saveModesToStorage(modes: Mode[]) {
+async function saveModesToStorage(modes: Mode[]): Promise<void> {
   await browser.storage.sync.set({ modes });
 }
 
 async function resetData() {
   await browser.storage.sync.set({ modes: [] });
+}
+
+async function populateDropdownExtensions() {
+  const dropdownMenu = document.getElementById('ex-menu') as HTMLElement;
+
+  while (dropdownMenu.firstChild) {
+    dropdownMenu.removeChild(dropdownMenu.firstChild);
+  }
+
+  try {
+    const extensions = await getExtensions();
+
+    if (extensions.length === 0) {
+      const noExtensionsItem = document.createElement('li');
+      noExtensionsItem.className =
+        'px-3 py-2 text-sm text-content pointer-events-none';
+      noExtensionsItem.textContent = 'No extensions available';
+      dropdownMenu.appendChild(noExtensionsItem);
+      return;
+    }
+
+    extensions.forEach((extension) => {
+      const listItem = createDropdownItem(extension);
+      dropdownMenu.appendChild(listItem);
+    });
+  } catch (error) {
+    console.error('Error fetching extensions:', error);
+    const errorItem = document.createElement('li');
+    errorItem.className = 'px-3 py-2 text-sm text-red-500';
+    errorItem.textContent = 'Failed to load extensions';
+    dropdownMenu.appendChild(errorItem);
+  }
+}
+
+// Create the dropdown item for extensions
+function createDropdownItem(extension: any): HTMLElement {
+  const listItem = document.createElement('li');
+  listItem.className =
+    'flex w-full justify-between items-center hover:bg-btn-bg px-3 py-2 rounded-lg text-sm cursor-pointer transition-colors duration-200';
+  listItem.dataset.extensionId = extension.id;
+
+  const container = document.createElement('div');
+  container.className = 'flex gap-2 items-center';
+
+  const icon = document.createElement('img');
+  icon.src = extension.icons?.[0]?.url || '';
+  icon.alt = extension.name;
+  icon.className = 'w-4 h-4';
+
+  const nameText = document.createElement('p');
+  nameText.textContent = extension.name;
+
+  container.appendChild(icon);
+  container.appendChild(nameText);
+
+  const checkIconWrapper = document.createElement('div');
+  checkIconWrapper.className = 'hidden';
+  checkIconWrapper.innerHTML = `
+    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-check">
+      <path d="M20 6 9 17l-5-5" />
+    </svg>
+  `;
+
+  listItem.appendChild(container);
+  listItem.appendChild(checkIconWrapper);
+
+  listItem.addEventListener('click', () => toggleExtensionSelection(listItem));
+
+  return listItem;
+}
+
+// Handle extension selection/deselection
+function toggleExtensionSelection(item: HTMLElement) {
+  const checkIconWrapper = item.querySelector('div:last-child') as HTMLElement;
+  const isSelected = !checkIconWrapper.classList.contains('hidden');
+
+  if (isSelected) {
+    item.classList.remove('bg-btn-bg');
+    checkIconWrapper.classList.add('hidden');
+  } else {
+    item.classList.add('bg-btn-bg');
+    checkIconWrapper.classList.remove('hidden');
+  }
+
+  // Update selected count
+  updateSelectedCount();
+}
+
+// Update selected extension count in the UI
+function updateSelectedCount() {
+  const selectedExtensions = getSelectedExtensions();
+  const defaultText = document.getElementById('default-text') as HTMLElement;
+  const countSelected = document.getElementById(
+    'count-selected'
+  ) as HTMLElement;
+
+  const selectedCount = selectedExtensions.length;
+
+  if (selectedCount > 0) {
+    defaultText.classList.add('hidden');
+    countSelected.classList.remove('hidden');
+    countSelected.textContent = `${selectedCount} selected`;
+  } else {
+    defaultText.classList.remove('hidden');
+    countSelected.classList.add('hidden');
+  }
+}
+
+// Get the list of selected extensions
+function getSelectedExtensions(): { id: string; logo: string }[] {
+  const selectedExtensions: { id: string; logo: string }[] = [];
+  const dropdownMenu = document.getElementById('ex-menu') as HTMLElement;
+
+  dropdownMenu.querySelectorAll('li').forEach((item) => {
+    if (!item.querySelector('div:last-child')?.classList.contains('hidden')) {
+      const extensionId = item.dataset.extensionId || '';
+      const iconElement = item.querySelector('img') as HTMLImageElement;
+      const extensionLogo = iconElement ? iconElement.src : '';
+
+      selectedExtensions.push({
+        id: extensionId,
+        logo: extensionLogo,
+      });
+    }
+  });
+
+  return selectedExtensions;
 }
