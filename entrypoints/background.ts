@@ -1,6 +1,4 @@
 export default defineBackground(() => {
-  console.log('Hello background!', { id: browser.runtime.id });
-
   getExtensions().then((extensions) => {
     browser.runtime.onConnect.addListener((port) => {
       port.postMessage({ message: extensions });

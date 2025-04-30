@@ -27,12 +27,12 @@ document.addEventListener('DOMContentLoaded', async () => {
   const extensionsContent = document.getElementById('extensions-content');
   const modesContent = document.getElementById('modes-content');
   const toggleAll = document.querySelector<HTMLInputElement>('#toggle-all');
+
   const extensionsCount =
     document.querySelector<HTMLParagraphElement>('#extensionsCount');
   const extensionsList =
     document.querySelector<HTMLUListElement>('#extensionsList');
   const addModeBtn = document.querySelector<HTMLButtonElement>('#add-mode-btn');
-  const saveModeBtn = document.querySelector<HTMLButtonElement>('#save-mode');
   // Modal
   const cancelModalBtn =
     document.querySelector<HTMLButtonElement>('#cancel-modal');
@@ -310,6 +310,69 @@ async function toggleAllExtensions(
   }
 }
 
+async function toggleModeExtensions(
+  modeId: string,
+  activate: boolean,
+  extensions: chrome.management.ExtensionInfo[],
+  extensionsList: HTMLUListElement | null
+) {
+  const modeStorage = await browser.storage.sync.get({ modes: [] });
+  const mode = modeStorage.modes.find((m: Mode) => m.id === modeId);
+
+  if (!mode) {
+    console.error(`Mode with ID ${modeId} not found.`);
+    return;
+  }
+
+  const modeExtensions = new Set(mode.extensions);
+
+  if (activate) {
+    // Only manage extensions that are part of the mode
+    for (const ex of extensions) {
+      if (modeExtensions.has(ex.id) && ex.id !== browser.runtime.id) {
+        await browser.management.setEnabled(ex.id, true);
+      }
+    }
+
+    // Update UI for the extensions list
+    extensionsList?.querySelectorAll('li').forEach((li) => {
+      const exId = li.dataset.extensionId;
+      if (exId && modeExtensions.has(exId)) {
+        const checkbox = li.querySelector(
+          'input[type="checkbox"]'
+        ) as HTMLInputElement;
+        if (checkbox) checkbox.checked = true;
+
+        const toggleDiv = li.querySelector('#toggle-ex');
+        if (toggleDiv) {
+          toggleDiv.classList.replace(
+            'peer-checked:bg-orange-600',
+            'peer-checked:bg-blue-600'
+          );
+        }
+      }
+    });
+  } else {
+    // When deactivating, only disable the extensions that were part of the mode
+    for (const ex of extensions) {
+      if (modeExtensions.has(ex.id) && ex.id !== browser.runtime.id) {
+        await browser.management.setEnabled(ex.id, false);
+      }
+    }
+
+    // Reset UI for extensions that were part of this mode
+    extensionsList?.querySelectorAll('li').forEach((li) => {
+      const exId = li.dataset.extensionId;
+      if (exId && modeExtensions.has(exId)) {
+        const checkbox = li.querySelector(
+          'input[type="checkbox"]'
+        ) as HTMLInputElement;
+        if (checkbox) checkbox.checked = false;
+      }
+    });
+  }
+}
+
 function filterExtensions(
   filterValue: FilterType,
   exListItems: NodeListOf<HTMLLIElement> | undefined
@@ -449,12 +512,12 @@ function createModeItem(
   enabled: boolean
 ): HTMLLIElement {
   const modeContainer = document.createElement('li');
+  modeContainer.dataset.modeId = id; // Add this for easy reference
 
   modeContainer.className =
     'p-4 bg-btn-border/10 rounded-xl hover:bg-btn-border/20 border border-btn-border/40 transition-colors duration-200';
 
   const modeInfo = document.createElement('div');
-
   modeInfo.className = 'flex justify-between items-start';
 
   const titleContainer = document.createElement('div');
@@ -464,8 +527,8 @@ function createModeItem(
   titleText.textContent = name;
 
   titleContainer.appendChild(titleText);
-
   modeInfo.appendChild(titleContainer);
+
   const settingsToggleContainer = document.createElement('div');
   settingsToggleContainer.className = 'flex gap-1 items-center';
 
@@ -486,19 +549,19 @@ function createModeItem(
 
   const svgContainer = document.createElement('div');
   svgContainer.innerHTML = `
-  <svg xmlns="http://www.w3.org/2000/svg" 
-       width="18" 
-       height="18" 
-       viewBox="0 0 24 24" 
-       fill="none" 
-       stroke-width="2" 
-       stroke-linecap="round" 
-       stroke-linejoin="round" 
-       class="lucide lucide-settings hover:stroke-neutral-400 transition-colors duration-300 cursor-pointer stroke-neutral-50">
-    <path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/>
-    <circle cx="12" cy="12" r="3"/>
-  </svg>
-`;
+    <svg xmlns="http://www.w3.org/2000/svg" 
+         width="18" 
+         height="18" 
+         viewBox="0 0 24 24" 
+         fill="none" 
+         stroke-width="2" 
+         stroke-linecap="round" 
+         stroke-linejoin="round" 
+         class="lucide lucide-settings hover:stroke-neutral-400 transition-colors duration-300 cursor-pointer stroke-neutral-50">
+      <path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/>
+      <circle cx="12" cy="12" r="3"/>
+    </svg>
+  `;
 
   const toggleLabel = document.createElement('label');
   toggleLabel.className = 'inline-flex items-center cursor-pointer';
@@ -506,11 +569,13 @@ function createModeItem(
   const toggleInput = document.createElement('input');
   toggleInput.type = 'checkbox';
   toggleInput.className = 'sr-only peer';
+  toggleInput.checked = enabled;
 
   const toggleDiv = document.createElement('div');
   toggleDiv.className =
     'relative w-9 h-5 bg-btn-bg peer-focus:outline-none rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[""] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600';
   toggleDiv.id = 'toggle-mode';
+
   toggleLabel.appendChild(toggleInput);
   toggleLabel.appendChild(toggleDiv);
 
@@ -522,16 +587,56 @@ function createModeItem(
   modeContainer.appendChild(avatarContainer);
 
   toggleInput.addEventListener('change', async () => {
-    enabled = toggleInput.checked;
+    console.log('Toggle changed for mode:', id);
+    const extensionsList =
+      document.querySelector<HTMLUListElement>('#extensionsList');
+    console.log('Found extensions list:', extensionsList ? 'yes' : 'no');
 
-    const savedState: ExtensionStorage = await browser.storage.sync.get({
-      modes: [],
-    });
-    const modeToUpdate = savedState.modes.find((mode) => mode.id === id);
-    if (modeToUpdate) {
-      modeToUpdate.enabled = enabled;
+    try {
+      const allExtensions = await getExtensions();
+      console.log('Got all extensions:', allExtensions.length);
+
+      enabled = toggleInput.checked;
+      console.log('New enabled state:', enabled);
+
+      // Update storage
+      const savedState = await browser.storage.sync.get({ modes: [] });
+      console.log('Current saved state:', savedState);
+
+      // Update all modes, ensuring only one is enabled at a time
+      const updatedModes = savedState.modes.map((mode: Mode) => ({
+        ...mode,
+        enabled: mode.id === id ? enabled : false,
+      }));
+
+      console.log('Saving updated modes:', updatedModes);
+      await saveModesToStorage(updatedModes);
+
+      // Toggle the extensions
+      await toggleModeExtensions(id, enabled, allExtensions, extensionsList);
+
+      // Update other mode toggles in the UI
+      const otherModes =
+        document.querySelectorAll<HTMLElement>('[data-mode-id]');
+      console.log('Found other modes:', otherModes.length);
+
+      otherModes.forEach((modeItem) => {
+        if (modeItem.dataset.modeId !== id) {
+          const otherToggle = modeItem.querySelector<HTMLInputElement>(
+            'input[type="checkbox"]'
+          );
+          if (otherToggle) {
+            console.log(
+              'Setting other mode toggle to false:',
+              modeItem.dataset.modeId
+            );
+            otherToggle.checked = false;
+          }
+        }
+      });
+    } catch (error) {
+      console.error('Error in toggle handler:', error);
     }
-    await saveModesToStorage(savedState.modes);
   });
 
   return modeContainer;
